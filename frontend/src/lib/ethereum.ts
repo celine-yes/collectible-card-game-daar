@@ -10,6 +10,8 @@ export type Details = {
   account?: string
 }
 
+// metamask se connecte au portefeuille Metamask, demande la permission d'accéder aux comptes de l'utilisateur, et récupère le provider et signer nécessaires pour interagir avec Ethereum
+
 const metamask = async (requestAccounts = true): Promise<Details | null> => {
   const ethereum = (window as any).ethereum
   if (ethereum) {
@@ -24,6 +26,7 @@ const metamask = async (requestAccounts = true): Promise<Details | null> => {
   return null
 }
 
+// silent se connecte au fournisseur de blockchain en silence, sans demander l'accès aux comptes de l'utilisateur.
 const silent = async (): Promise<Details> => {
   const ethereum = (window as any).ethereum
   if (ethereum) {
@@ -47,6 +50,7 @@ export const connect = async (provider: Wallet) => {
   }
 }
 
+// fonctions permettent d'écouter les changements de compte ou de réseau dans Metamask et de déclencher des actions (blockchain locale)
 export const accountsChanged = (callback: (accounts: string[]) => void) => {
   const ethereum = (window as any).ethereum
   if (ethereum && ethereum.on) {

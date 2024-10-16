@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { BrowserRouter as Router, Route,  Routes, Link } from 'react-router-dom';
 import styles from './styles.module.css'
 import * as ethereum from '@/lib/ethereum'
 import * as main from '@/lib/main'
+import Collections from './components/Collections';
+import MintedUsers from './components/MintedUsers';
+import MintNFT from './components/MintNFT';
+import './css/App.css';
 
+//Gestion de Metamask et du contrat
 type Canceler = () => void
 const useAffect = (
   asyncEffect: () => Promise<Canceler | void>,
@@ -39,11 +45,46 @@ const useWallet = () => {
   }, [details, contract])
 }
 
+//Sidebar
+
+const Sidebar = () => (
+  <div className='sidebar'>
+    <h2>Menu</h2>
+    <ul>
+      <li><Link to="/">Accueil</Link></li>
+      <li><Link to="/collections">Collections</Link></li>
+      <li><Link to="/minted-users">Utilisateurs</Link></li>
+      <li><Link to="/mint-nft">Mint NFT</Link></li>
+    </ul>
+  </div>
+);
+
 export const App = () => {
   const wallet = useWallet()
   return (
-    <div className={styles.body}>
-      <h1>Welcome to Pokémon TCG</h1>
-    </div>
+    <Router>
+      <div className='app-container'>
+        <Sidebar />
+        <div className='main-container'> 
+          <Routes>
+          <Route path="/" element={
+              <div className={styles.body}>
+                <h1>Bienvenue sur Pokémon TCG</h1>
+                {/* {wallet ? (
+                  <p>Adresse de l'utilisateur : {wallet.details?.account}</p>
+                ) : (
+                  <p>Connecté à Metamask</p>
+                )} */}
+              </div>
+            } />
+            <Route path="/collections" element={<Collections />} />
+            <Route path="/minted-users" element={<MintedUsers />} />
+            <Route path="/mint-nft" element={<MintNFT />} />
+          </Routes>
+        </div>
+      </div>
+    </Router>
   )
 }
+
+export default App;
