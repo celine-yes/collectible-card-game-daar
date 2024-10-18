@@ -25,3 +25,141 @@
     font-size: 18px;
     color: #1e90ff;
   }
+
+.collections-page {
+  padding: 20px;
+}
+
+.create-collection-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.create-collection-form input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.create-collection-form button {
+  padding: 8px 16px;
+  background-color: #1e90ff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.collections-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.collection-card {
+  background-color: #f8f8ff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.collection-image {
+  height: 150px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #e0e0e0;
+}
+
+.collection-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.placeholder-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 48px;
+  color: #1e90ff;
+  background-color: #f0f0f0;
+}
+
+.collection-info {
+  padding: 15px;
+  text-align: center;
+}
+
+.collection-info h3 {
+  margin: 0 0 10px;
+  color: #1e90ff;
+}
+
+.collection-info p {
+  margin: 0;
+  color: #666;
+}
+
+.cards-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 30px; /* Augmentez l'espace entre les cartes */
+  justify-content: flex-start;
+}
+
+.card {
+  width: calc(25% - 30px); /* 4 cartes par ligne, en tenant compte de l'espace entre elles */
+  max-width: 270px; /* Augmentez la taille maximale d'une carte */
+  background-color: #f8f8ff;
+  border-radius: 12px; /* Augmentez légèrement le rayon de bordure */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Augmentez légèrement l'ombre */
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease; /* Ajoutez une transition pour un effet au survol */
+}
+
+.card:hover {
+  transform: scale(1.05); /* Effet de zoom au survol */
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.card-info {
+  padding: 15px; /* Augmentez le padding */
+  text-align: center;
+}
+
+.card-info p {
+  margin: 8px 0; /* Augmentez légèrement la marge */
+  font-size: 16px; /* Augmentez la taille de la police */
+}
+
+/* Responsive design */
+@media (max-width: 1400px) {
+  .card {
+    width: calc(33.33% - 30px); /* 3 cartes par ligne */
+  }
+}
+
+@media (max-width: 1000px) {
+  .card {
+    width: calc(50% - 30px); /* 2 cartes par ligne */
+  }
+}
+
+@media (max-width: 600px) {
+  .card {
+    width: 100%; /* 1 carte par ligne */
+    max-width: 300px; /* Augmentez la taille maximale pour les petits écrans */
+    margin: 0 auto; /* Centrez la carte sur les petits écrans */
+  }
+}

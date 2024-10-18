@@ -61,13 +61,37 @@ contract TCG is ERC721, Ownable {
 
     function tokenURI(uint256 tokenId) public view override returns (string memory) {
         require(_ownerOf(tokenId) != address(0), "ERC721Metadata: URI query for nonexistent token");
+        return string(abi.encodePacked("http://localhost:3000/metadata/", tokenId.toString()));
+    }
 
-        uint256 collectionId = tokenCollection[tokenId];
-        uint256 cardNumber = collections[collectionId].cards[tokenId];
+    function getAllCollections() public view returns (uint[] memory, string[] memory, uint256[] memory) {
+        uint[] memory ids = new uint[](collectionIdTracker);
+        string[] memory names = new string[](collectionIdTracker);
+        uint256[] memory cardCounts = new uint256[](collectionIdTracker);
+        
+        for (uint i = 0; i < collectionIdTracker; i++) {
+            ids[i] = i;
+            names[i] = collections[i].name;
+            cardCounts[i] = collections[i].cardCount;
+        }
+        
+        return (ids, names, cardCounts);
+    }
 
-        // Construire l'URI des métadonnées
-        string memory baseURI = "https://your-api.com/metadata/";
-        return string(abi.encodePacked(baseURI, collectionId.toString(), "/", cardNumber.toString()));
+    //fonction pour récupérer les NFTs d'un utilisateur
+    function getNFTsOfUser(address user) public view returns (uint256[] memory) {
+        uint256 balance = balanceOf(user);
+        uint256[] memory tokenIds = new uint256[](balance);
+        uint256 counter = 0;
+        
+        for (uint256 i = 0; i < tokenIdTracker; i++) {
+            if (_ownerOf(i) == user) {
+                tokenIds[counter] = i;
+                counter++;
+            }
+        }
+        
+        return tokenIds;
     }
 
 
