@@ -1,56 +1,103 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../css/MintNFT.css'
 
-const MintNFT = () => {
-  const [userAddress, setUserAddress] = useState('');
-  const [cardId, setCardId] = useState('');
-  const [message, setMessage] = useState('');
+interface Card {
+  id: string;
+  name: string;
+  number: string;
+}
 
-  const handleMintNFT = async () => {
+interface MintCardModalProps {
+  card: Card;
+  collectionId: string;
+  closeModal: () => void;
+}
+
+const MintCardModal: React.FC<MintCardModalProps> = ({ card, collectionId, closeModal }) => {
+  const [mintAddress, setMintAddress] = useState('');
+  const [useExistingUser, setUseExistingUser] = useState(false);
+  const [selectedUser, setSelectedUser] = useState('');
+  const [users, setUsers] = useState<string[]>([]);
+
+  useEffect(() => {
+    fetchMintedUsers();
+  }, []);
+
+  const fetchMintedUsers = async () => {
     try {
-      const response = await axios.post('http://localhost:4000/mint-nft', {
-        userAddress,
-        cardId,
-      });
-      if (response.data.success) {
-        setMessage(`NFT minté avec succès à ${userAddress}`);
-      } else {
-        setMessage('Erreur lors du mint du NFT.');
-      }
+      const response = await axios.get<string[]>('http://localhost:3000/minted-users');
+      setUsers(response.data);
     } catch (error) {
-      console.error('Erreur lors du mint du NFT:', error);
-      setMessage('Une erreur est survenue.');
+      console.error('Error fetching minted users:', error);
+    }
+  };
+
+  const mintCard = async () => {
+    try {
+      const userAddress = useExistingUser ? selectedUser : mintAddress;
+      await axios.post('http://localhost:3000/mint-nft', {
+        userAddress,
+        collectionId,
+        cardNumber: card.number
+      });
+      closeModal();
+    } catch (error) {
+      console.error('Error minting card:', error);
     }
   };
 
   return (
-    <div>
-      <h1>Mint un NFT à un utilisateur</h1>
-      <form onSubmit={(e) => { e.preventDefault(); handleMintNFT(); }}>
+    <div className="modal">
+      <div className="modal-content">
+        <h2>Mint {card.name}</h2>
         <div>
-          <label>Adresse de l'utilisateur</label>
-          <input
-            type="text"
-            value={userAddress}
-            onChange={(e) => setUserAddress(e.target.value)}
-            placeholder="0x123..."
-          />
+          <label>
+            <input
+              type="radio"
+              checked={useExistingUser}
+              onChange={() => setUseExistingUser(true)}
+            />
+            Utiliser un utilisateur existant
+          </label>
+          {useExistingUser && (
+            <select
+              value={selectedUser}
+              onChange={(e) => setSelectedUser(e.target.value)}
+            >
+              <option value="">Sélectionner un utilisateur</option>
+              {users.map((user) => (
+                <option key={user} value={user}>
+                  {user}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
+
         <div>
-          <label>ID de la carte</label>
-          <input
-            type="text"
-            value={cardId}
-            onChange={(e) => setCardId(e.target.value)}
-            placeholder="Ex : 1"
-          />
+          <label>
+            <input
+              type="radio"
+              checked={!useExistingUser}
+              onChange={() => setUseExistingUser(false)}
+            />
+            Saisir une nouvelle adresse
+          </label>
+          {!useExistingUser && (
+            <input
+              type="text"
+              value={mintAddress}
+              onChange={(e) => setMintAddress(e.target.value)}
+              placeholder="Nouvelle adresse de l'utilisateur"
+            />
+          )}
         </div>
-        <button type="submit">Mint NFT</button>
-      </form>
-      {message && <p>{message}</p>}
+
+        <button onClick={mintCard}>Mint</button>
+        <button onClick={closeModal}>Fermer</button>
+      </div>
     </div>
   );
 };
 
-export default MintNFT;
+export default MintCardModal;

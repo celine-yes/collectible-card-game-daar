@@ -54,7 +54,6 @@ const Sidebar = () => (
       <li><Link to="/">Accueil</Link></li>
       <li><Link to="/collections">Collections</Link></li>
       <li><Link to="/minted-users">Utilisateurs</Link></li>
-      <li><Link to="/mint-nft">Mint NFT</Link></li>
     </ul>
   </div>
 );
@@ -79,7 +78,6 @@ export const App = () => {
             } />
             <Route path="/collections" element={<Collections />} />
             <Route path="/minted-users" element={<MintedUsers />} />
-            <Route path="/mint-nft" element={<MintNFT />} />
           </Routes>
         </div>
       </div>

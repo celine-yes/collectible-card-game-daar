@@ -25,6 +25,9 @@ contract TCG is ERC721, Ownable {
     mapping(uint => Collection) public collections;
     mapping(uint => uint) public tokenCollection;
 
+    address[] public mintedUsers; 
+    mapping(address => bool) public hasMinted; // Pour vérifier si un utilisateur a déjà reçu un NFT
+
     event CollectionCreated(uint indexed collectionId, string name, uint256 cardCount);
     event CardMinted(address indexed to, uint256 indexed tokenId, uint256 indexed collectionId, uint256 cardNumber);
 
@@ -49,7 +52,16 @@ contract TCG is ERC721, Ownable {
         collections[_collectionId].cards[tokenId] = _cardNumber;
         tokenCollection[tokenId] = _collectionId;
 
+        if (!hasMinted[_to]) {
+            mintedUsers.push(_to);
+            hasMinted[_to] = true;
+        }
+
         emit CardMinted(_to, tokenId, _collectionId, _cardNumber);
+    }
+
+    function getAllMintedUsers() public view returns (address[] memory) {
+        return mintedUsers;
     }
 
     function getCard(uint256 _tokenId) public view returns (string memory collectionName, uint256 cardNumber) {
@@ -93,9 +105,6 @@ contract TCG is ERC721, Ownable {
         
         return tokenIds;
     }
-
-
-
 
 }
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../css/Collections.css';
+import MintNFT from './MintNFT';
 
 interface Collection {
   id: string;
@@ -18,11 +19,16 @@ interface Card {
 
 const CollectionManager: React.FC = () => {
   const [collections, setCollections] = useState<Collection[]>([]);
-  const [newCollectionName, setNewCollectionName] = useState('');
-  const [newCollectionCardCount, setNewCollectionCardCount] = useState('');
+  // const [newCollectionName, setNewCollectionName] = useState('');
+  // const [newCollectionCardCount, setNewCollectionCardCount] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
+
+  //for minting card
+  const [showModal, setShowModal] = useState(false);
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+
 
   useEffect(() => {
     fetchCollections();
@@ -38,20 +44,20 @@ const CollectionManager: React.FC = () => {
     }
   };
 
-  const createCollection = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      await axios.post('http://localhost:3000/create-collection', {
-        name: newCollectionName,
-        cardCount: parseInt(newCollectionCardCount)
-      });
-      setNewCollectionName('');
-      setNewCollectionCardCount('');
-      fetchCollections();
-    } catch (error) {
-      console.error('Error creating collection:', error);
-    }
-  };
+  // const createCollection = async (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   try {
+  //     await axios.post('http://localhost:3000/create-collection', {
+  //       name: newCollectionName,
+  //       cardCount: parseInt(newCollectionCardCount)
+  //     });
+  //     setNewCollectionName('');
+  //     setNewCollectionCardCount('');
+  //     fetchCollections();
+  //   } catch (error) {
+  //     console.error('Error creating collection:', error);
+  //   }
+  // };
 
   const initializePokemonSets = async () => {
     try {
@@ -76,13 +82,22 @@ const CollectionManager: React.FC = () => {
     fetchCollectionCards(collection.id);
   };
 
+  const handleMintClick = (card: Card) => {
+    console.log("dans handleMintClick")
+    console.log(card.number);
+    setSelectedCard(card);
+    setShowModal(true); 
+    console.log(selectedCard)
+    console.log(showModal)
+  };
+
   return (
     <div className="collections-page">
       {!isInitialized && (
         <button onClick={initializePokemonSets}>Initialize Pokemon Sets</button>
       )}
 
-      <h2>Create New Collection</h2>
+      {/* <h2>Create New Collection</h2>
       <form onSubmit={createCollection} className="create-collection-form">
         <input
           type="text"
@@ -99,18 +114,15 @@ const CollectionManager: React.FC = () => {
           required
         />
         <button type="submit">Create Collection</button>
-      </form>
+      </form> */}
 
-      <h2>Existing Collections</h2>
+<h2>Collections</h2>
       <div className="collections-grid">
         {collections.map((collection) => (
           <div key={collection.id} className="collection-card" onClick={() => handleCollectionClick(collection)}>
             <div className="collection-image">
               {collection.imageUrl ? (
-                <img 
-                  src={collection.imageUrl} 
-                  alt={`${collection.name} logo`} 
-                />
+                <img src={collection.imageUrl} alt={`${collection.name} logo`} />
               ) : (
                 <div className="placeholder-image">{collection.name[0]}</div>
               )}
@@ -134,10 +146,19 @@ const CollectionManager: React.FC = () => {
                   <p>{card.name}</p>
                   <p>#{card.number}</p>
                 </div>
+                <button onClick={() => handleMintClick(card)}>Mint this card</button>
               </div>
             ))}
           </div>
         </div>
+      )}
+
+      {showModal && selectedCard && (
+        <MintNFT
+          card={selectedCard}
+          collectionId={selectedCollection!.id}
+          closeModal={() => setShowModal(false)}
+        />
       )}
     </div>
   );

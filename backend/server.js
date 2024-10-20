@@ -129,19 +129,39 @@ app.get('/user-nfts/:userAddress', async (req, res) => {
   }
 });
 
-// Route pour mint un NFT à un utilisateur
 app.post('/mint-nft', async (req, res) => {
+  console.log('Requête reçue pour mint un NFT');
   const { userAddress, collectionId, cardNumber } = req.body;
+  console.log('userAdress :');
+  console.log(userAddress);
   if (!userAddress || collectionId === undefined || cardNumber === undefined) {
+    console.log('Paramètres manquants:', req.body);
     return res.status(400).json({ error: 'Paramètres manquants' });
   }
+
   try {
+    console.log('Appel du contrat pour mint une carte...');
     const tx = await contract.mintCard(userAddress, collectionId, cardNumber);
     await tx.wait();
+    console.log('Transaction confirmée !');
+
+    const nfts = await contract.getNFTsOfUser(userAddress);
+    console.log('NFTs de l\'utilisateur après mint:', nfts);
+
     res.json({ success: true, message: `NFT minté avec succès à l'utilisateur ${userAddress}` });
   } catch (error) {
     console.error('Erreur lors du mint du NFT:', error);
     res.status(500).json({ success: false, error: 'Erreur serveur lors du mint du NFT' });
+  }
+});
+
+app.get('/minted-users', async (req, res) => {
+  try {
+    const mintedUsers = await contract.getAllMintedUsers(); 
+    res.json(mintedUsers);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des utilisateurs:', error);
+    res.status(500).json({ error: 'Erreur serveur lors de la récupération des utilisateurs.' });
   }
 });
 
@@ -161,7 +181,12 @@ async function addPokemonSet(setId) {
 }
 
 async function initializePokemonSets() {
-  const defaultSets = ['sv7', 'sv6pt5', 'swsh6']; // Exemple de sets à ajouter
+  const defaultSets = [
+    'sv7', 'sv6pt5', 'swsh6',
+    'sm12', 'sm11', 'sm10', 
+    'xy12', 'xy11', 'xy10', 
+    'bw11', 'bw10', 'bw9',
+  ]; 
   for (const setId of defaultSets) {
     await addPokemonSet(setId);
   }
