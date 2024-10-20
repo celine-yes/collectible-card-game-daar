@@ -1,36 +1,44 @@
 /* MintedUsers page style */
 .users-container {
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: column;
     gap: 20px;
   }
   
   .user-card {
-    background-color: #f0f4ff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+  }
+  
+  .user-address {
+    cursor: pointer;
+    padding: 10px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+  }
+  
+  .user-address:hover {
+    background-color: #e0e0e0;
   }
   
   .nft-list {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
+    margin-top: 15px;
   }
   
   .nft-card {
-    background-color: #ffffff;
+    border: 1px solid #eee;
     padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    width: 150px;
-    text-align: center;
+    border-radius: 5px;
+    width: 200px;
   }
   
   .nft-card img {
     width: 100%;
-    border-radius: 5px;
+    height: auto;
   }
   
   .user-card h2 {

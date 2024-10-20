@@ -2,14 +2,36 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import '../css/MintedUsers.css'
 
+interface NFT {
+  tokenId: string;
+  collectionName: string;
+  cardNumber: string;
+  name?: string;
+  imageUrl?: string;
+  cardId?: string;
+}
+
+interface User {
+  address: string;
+  nfts: NFT[];
+}
+
 const MintedUsers = () => {
-  const [users, setUsers] = useState<any[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [openUser, setOpenUser] = useState<string | null>(null);
 
   // Récupère les utilisateurs et leurs NFTs depuis le backend
   const fetchMintedUsers = async () => {
     try {
-      const response = await axios.get('http://localhost:4000/minted-users');
-      setUsers(response.data);
+      const response = await axios.get('http://localhost:3000/minted-users');
+      const mintedAddresses = response.data;
+      
+      const usersWithNFTs = await Promise.all(mintedAddresses.map(async (address: string) => {
+        const nftsResponse = await axios.get(`http://localhost:3000/user-nfts/${address}`);
+        return { address, nfts: nftsResponse.data };
+      }));
+      
+      setUsers(usersWithNFTs);
     } catch (error) {
       console.error('Erreur lors de la récupération des utilisateurs mintés', error);
     }
@@ -19,6 +41,14 @@ const MintedUsers = () => {
     fetchMintedUsers();
   }, []);
 
+  const toggleUserCards = (address: string) => {
+    if (openUser === address) {
+      setOpenUser(null);
+    } else {
+      setOpenUser(address);
+    }
+  };
+
   return (
     <div>
       <h1>Liste des utilisateurs mintés et leurs cartes</h1>
@@ -26,17 +56,20 @@ const MintedUsers = () => {
         {users.length > 0 ? (
           users.map((user, index) => (
             <div key={index} className="user-card">
-              <h2>Adresse : {user.address}</h2>
-              <p>Cartes possédées :</p>
-              <div className="nft-list">
-                {user.nfts.map((nft: any, nftIndex: number) => ( // Utilisation de "any" pour nft
-                  <div key={nftIndex} className="nft-card">
-                    <h3>{nft.name}</h3>
-                    <img src={nft.imageUrl} alt={nft.name} />
-                    <p>ID de la carte : {nft.cardId}</p>
-                  </div>
-                ))}
-              </div>
+              <h2 onClick={() => toggleUserCards(user.address)} className="user-address">
+                Utilisateur : {user.address}
+              </h2>
+              {openUser === user.address && (
+                <div className="nft-list">
+                  {user.nfts.map((nft: NFT, nftIndex: number) => (
+                    <div key={nftIndex} className="nft-card">
+                      <h3>{nft.name || `Carte #${nft.cardNumber}`}</h3>
+                      {nft.imageUrl && <img src={nft.imageUrl} alt={nft.name || `Carte #${nft.cardNumber}`} />}
+                      <p>{nft.collectionName}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))
         ) : (

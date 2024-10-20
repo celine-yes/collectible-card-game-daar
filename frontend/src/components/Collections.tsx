@@ -24,11 +24,8 @@ const CollectionManager: React.FC = () => {
   const [isInitialized, setIsInitialized] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
-
-  //for minting card
+  const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
-
 
   useEffect(() => {
     fetchCollections();
@@ -82,13 +79,25 @@ const CollectionManager: React.FC = () => {
     fetchCollectionCards(collection.id);
   };
 
-  const handleMintClick = (card: Card) => {
-    console.log("dans handleMintClick")
-    console.log(card.number);
-    setSelectedCard(card);
-    setShowModal(true); 
-    console.log(selectedCard)
-    console.log(showModal)
+  const toggleCardSelection = (card: Card) => {
+    setSelectedCards(prev => 
+      prev.find(c => c.id === card.id)
+        ? prev.filter(c => c.id !== card.id)
+        : [...prev, card]
+    );
+  };
+
+  const handleMintClick = () => {
+    setShowModal(true);
+  };
+
+  const resetCardSelection = () => {
+    setSelectedCards([]);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    resetCardSelection();
   };
 
   return (
@@ -97,26 +106,7 @@ const CollectionManager: React.FC = () => {
         <button onClick={initializePokemonSets}>Initialize Pokemon Sets</button>
       )}
 
-      {/* <h2>Create New Collection</h2>
-      <form onSubmit={createCollection} className="create-collection-form">
-        <input
-          type="text"
-          value={newCollectionName}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCollectionName(e.target.value)}
-          placeholder="Collection Name"
-          required
-        />
-        <input
-          type="number"
-          value={newCollectionCardCount}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewCollectionCardCount(e.target.value)}
-          placeholder="Card Count"
-          required
-        />
-        <button type="submit">Create Collection</button>
-      </form> */}
-
-<h2>Collections</h2>
+      <h2>Collections</h2>
       <div className="collections-grid">
         {collections.map((collection) => (
           <div key={collection.id} className="collection-card" onClick={() => handleCollectionClick(collection)}>
@@ -138,26 +128,36 @@ const CollectionManager: React.FC = () => {
       {selectedCollection && (
         <div className="collection-details">
           <h3>{selectedCollection.name} Cards</h3>
+          <button 
+            onClick={handleMintClick} 
+            disabled={selectedCards.length === 0}
+            className="mint-button"
+          >
+            Mint Selected Cards ({selectedCards.length})
+          </button>
           <div className="cards-grid">
             {cards.map((card) => (
-              <div key={card.id} className="card">
+              <div 
+                key={card.id} 
+                className={`card ${selectedCards.some(c => c.id === card.id) ? 'selected' : ''}`}
+                onClick={() => toggleCardSelection(card)}
+              >
                 <img src={card.imageUrl} alt={card.name} />
                 <div className="card-info">
                   <p>{card.name}</p>
                   <p>#{card.number}</p>
                 </div>
-                <button onClick={() => handleMintClick(card)}>Mint this card</button>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {showModal && selectedCard && (
+      {showModal && (
         <MintNFT
-          card={selectedCard}
+          cards={selectedCards}
           collectionId={selectedCollection!.id}
-          closeModal={() => setShowModal(false)}
+          closeModal={handleCloseModal}
         />
       )}
     </div>

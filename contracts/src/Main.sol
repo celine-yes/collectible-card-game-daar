@@ -31,6 +31,38 @@ contract TCG is ERC721, Ownable {
     event CollectionCreated(uint indexed collectionId, string name, uint256 cardCount);
     event CardMinted(address indexed to, uint256 indexed tokenId, uint256 indexed collectionId, uint256 cardNumber);
 
+    // Mapping pour stocker les cartes de chaque booster
+    mapping(uint256 => uint256[]) private boosterCards;
+
+    // Fonction pour définir les cartes d'un booster (appelée par le propriétaire ou un contrat autorisé)
+    function setBoosterCards(uint256 boosterId, uint256[] memory cardIds) external onlyOwner {
+        boosterCards[boosterId] = cardIds;
+    }
+
+    // Fonction pour minter les cartes d'un booster
+    function mintBoosterCards(address to, uint256 boosterId) external {
+        require(msg.sender == address(boosterContract), "Only booster contract can call this function");
+        uint256[] memory cardIds = boosterCards[boosterId];
+        require(cardIds.length > 0, "Booster content not set");
+
+        for (uint i = 0; i < cardIds.length; i++) {
+            uint256 collectionId = cardIds[i] / 1000; // Exemple de calcul de l'ID de collection
+            uint256 cardNumber = cardIds[i] % 1000; // Exemple de calcul du numéro de carte
+            mintCard(to, collectionId, cardNumber);
+        }
+
+        // Effacer les données du booster après l'avoir ouvert
+        delete boosterCards[boosterId];
+    }
+
+    // Adresse du contrat Booster
+    address public boosterContract;
+
+    // Fonction pour définir l'adresse du contrat Booster (appelée par le propriétaire)
+    function setBoosterContract(address _boosterContract) external onlyOwner {
+        boosterContract = _boosterContract;
+    }
+
     constructor() ERC721("Trading Card Game", "TCG") Ownable(msg.sender) {}
 
     function createCollection(string memory _name, uint _cardCount) public onlyOwner {
@@ -58,6 +90,14 @@ contract TCG is ERC721, Ownable {
         }
 
         emit CardMinted(_to, tokenId, _collectionId, _cardNumber);
+    }
+
+    function batchMintCards(address[] memory _to, uint256[] memory _collectionIds, uint256[] memory _cardNumbers) public onlyOwner {
+        require(_to.length == _collectionIds.length && _to.length == _cardNumbers.length, "Input arrays must have the same length");
+        
+        for (uint i = 0; i < _to.length; i++) {
+            mintCard(_to[i], _collectionIds[i], _cardNumbers[i]);
+        }
     }
 
     function getAllMintedUsers() public view returns (address[] memory) {

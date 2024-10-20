@@ -8,12 +8,12 @@ interface Card {
 }
 
 interface MintCardModalProps {
-  card: Card;
+  cards: Card[];
   collectionId: string;
   closeModal: () => void;
 }
 
-const MintCardModal: React.FC<MintCardModalProps> = ({ card, collectionId, closeModal }) => {
+const MintCardModal: React.FC<MintCardModalProps> = ({ cards, collectionId, closeModal }) => {
   const [mintAddress, setMintAddress] = useState('');
   const [useExistingUser, setUseExistingUser] = useState(false);
   const [selectedUser, setSelectedUser] = useState('');
@@ -32,24 +32,24 @@ const MintCardModal: React.FC<MintCardModalProps> = ({ card, collectionId, close
     }
   };
 
-  const mintCard = async () => {
+  const mintCards = async () => {
     try {
       const userAddress = useExistingUser ? selectedUser : mintAddress;
-      await axios.post('http://localhost:3000/mint-nft', {
+      await axios.post('http://localhost:3000/mint-nfts', {
         userAddress,
         collectionId,
-        cardNumber: card.number
+        cardNumbers: cards.map(card => card.number)
       });
       closeModal();
     } catch (error) {
-      console.error('Error minting card:', error);
+      console.error('Error minting cards:', error);
     }
   };
 
   return (
     <div className="modal">
       <div className="modal-content">
-        <h2>Mint {card.name}</h2>
+        <h2>Mint Cards</h2>
         <div>
           <label>
             <input
@@ -93,7 +93,16 @@ const MintCardModal: React.FC<MintCardModalProps> = ({ card, collectionId, close
           )}
         </div>
 
-        <button onClick={mintCard}>Mint</button>
+        <div>
+          <h3>Cartes à minter :</h3>
+          <ul>
+            {cards.map(card => (
+              <li key={card.id}>{card.name}</li>
+            ))}
+          </ul>
+        </div>
+
+        <button onClick={mintCards} disabled={cards.length === 0}>Mint Selected Cards</button>
         <button onClick={closeModal}>Fermer</button>
       </div>
     </div>

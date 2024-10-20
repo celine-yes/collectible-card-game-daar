@@ -13,6 +13,9 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 200px;
     text-align: center;
+    border: 2px solid transparent;
+    transition: border-color 0.3s ease;
+    cursor: pointer;
   }
   
   .card img {
@@ -199,4 +202,34 @@
 
 .modal-content button:hover {
   background-color: #0056b3;
+}
+
+.mint-button {
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.mint-button:hover {
+  background-color: #45a049;
+}
+
+.mint-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.card.selected {
+  border-color: #4CAF50;  /* Couleur verte */
+  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);  /* Ombre verte */
+}
+
+.card:hover {
+  border-color: #4CAF50;  /* Couleur verte au survol */
 }

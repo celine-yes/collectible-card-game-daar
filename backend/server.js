@@ -116,10 +116,31 @@ app.get('/user-nfts/:userAddress', async (req, res) => {
     const tokenIds = await contract.getNFTsOfUser(userAddress);
     const nfts = await Promise.all(tokenIds.map(async (tokenId) => {
       const [collectionName, cardNumber] = await contract.getCard(tokenId);
+      
+      // Récupérer les détails de la carte depuis l'API Pokémon TCG
+      let cardDetails = {};
+      try {
+        const response = await axios.get(`https://api.pokemontcg.io/v2/cards`, {
+          headers: { 'X-Api-Key': process.env.POKEMON_TCG_API_KEY },
+          params: { q: `set.name:"${collectionName}" number:${cardNumber}` }
+        });
+        if (response.data.data && response.data.data.length > 0) {
+          const card = response.data.data[0];
+          cardDetails = {
+            name: card.name,
+            imageUrl: card.images.small,
+            cardId: card.id
+          };
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des détails de la carte:', error);
+      }
+
       return {
         tokenId: tokenId.toString(),
         collectionName,
-        cardNumber: cardNumber.toString()
+        cardNumber: cardNumber.toString(),
+        ...cardDetails
       };
     }));
     res.json(nfts);
@@ -132,14 +153,22 @@ app.get('/user-nfts/:userAddress', async (req, res) => {
 app.post('/mint-nft', async (req, res) => {
   console.log('Requête reçue pour mint un NFT');
   const { userAddress, collectionId, cardNumber } = req.body;
-  console.log('userAdress :');
-  console.log(userAddress);
+  console.log('userAddress :', userAddress);
+
   if (!userAddress || collectionId === undefined || cardNumber === undefined) {
     console.log('Paramètres manquants:', req.body);
     return res.status(400).json({ error: 'Paramètres manquants' });
   }
 
   try {
+    // Afficher l'adresse du propriétaire du contrat
+    const ownerAddress = await contract.owner();
+    console.log('Adresse du propriétaire du contrat :', ownerAddress);
+
+    // Afficher l'adresse du signataire (celui qui exécute la transaction)
+    const signerAddress = await signer.getAddress();
+    console.log('Adresse du signataire :', signerAddress);
+
     console.log('Appel du contrat pour mint une carte...');
     const tx = await contract.mintCard(userAddress, collectionId, cardNumber);
     await tx.wait();
@@ -147,8 +176,14 @@ app.post('/mint-nft', async (req, res) => {
 
     const nfts = await contract.getNFTsOfUser(userAddress);
     console.log('NFTs de l\'utilisateur après mint:', nfts);
+    console.log(`NFT minté avec succès à l'utilisateur ${userAddress}`);
 
-    res.json({ success: true, message: `NFT minté avec succès à l'utilisateur ${userAddress}` });
+    res.json({ 
+      success: true, 
+      message: `NFT minté avec succès à l'utilisateur ${userAddress}`,
+      ownerAddress: ownerAddress,
+      signerAddress: signerAddress
+    });
   } catch (error) {
     console.error('Erreur lors du mint du NFT:', error);
     res.status(500).json({ success: false, error: 'Erreur serveur lors du mint du NFT' });
@@ -162,6 +197,40 @@ app.get('/minted-users', async (req, res) => {
   } catch (error) {
     console.error('Erreur lors de la récupération des utilisateurs:', error);
     res.status(500).json({ error: 'Erreur serveur lors de la récupération des utilisateurs.' });
+  }
+});
+
+app.post('/mint-nfts', async (req, res) => {
+  console.log('Requête reçue pour mint plusieurs NFTs');
+  const { userAddress, collectionId, cardNumbers } = req.body;
+  console.log('userAddress :', userAddress);
+
+  if (!userAddress || collectionId === undefined || !cardNumbers || !Array.isArray(cardNumbers)) {
+    console.log('Paramètres manquants ou invalides:', req.body);
+    return res.status(400).json({ error: 'Paramètres manquants ou invalides' });
+  }
+
+  try {
+    console.log('Appel du contrat pour mint plusieurs cartes...');
+    const tx = await contract.batchMintCards(
+      Array(cardNumbers.length).fill(userAddress),
+      Array(cardNumbers.length).fill(collectionId),
+      cardNumbers
+    );
+    await tx.wait();
+    console.log('Transaction confirmée !');
+
+    const nfts = await contract.getNFTsOfUser(userAddress);
+    console.log('NFTs de l\'utilisateur après mint:', nfts);
+    console.log(`${cardNumbers.length} NFTs mintés avec succès à l'utilisateur ${userAddress}`);
+
+    res.json({ 
+      success: true, 
+      message: `${cardNumbers.length} NFTs mintés avec succès à l'utilisateur ${userAddress}`
+    });
+  } catch (error) {
+    console.error('Erreur lors du mint des NFTs:', error);
+    res.status(500).json({ success: false, error: 'Erreur serveur lors du mint des NFTs' });
   }
 });
 
