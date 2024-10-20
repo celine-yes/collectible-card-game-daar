@@ -169,6 +169,12 @@ app.post('/mint-nft', async (req, res) => {
     const signerAddress = await signer.getAddress();
     console.log('Adresse du signataire :', signerAddress);
 
+    if (signerAddress.toLowerCase() !== ownerAddress.toLowerCase()) {
+      return res.status(403).json({ error: "Seul l'admin peut effectuer le mint." });
+    }
+
+    //const tokenURI = `http://localhost:3000/metadata/${cardNumber}`;  
+
     console.log('Appel du contrat pour mint une carte...');
     const tx = await contract.mintCard(userAddress, collectionId, cardNumber);
     await tx.wait();

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import Web3 from 'web3';
+import { ethers } from 'ethers';
 
 interface Card {
   id: string;
@@ -18,9 +20,23 @@ const MintCardModal: React.FC<MintCardModalProps> = ({ cards, collectionId, clos
   const [useExistingUser, setUseExistingUser] = useState(false);
   const [selectedUser, setSelectedUser] = useState('');
   const [users, setUsers] = useState<string[]>([]);
+  const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null);
 
   useEffect(() => {
     fetchMintedUsers();
+    // const listenForEvent = async () => {
+    //   const provider = new ethers.providers.Web3Provider(window.ethereum);
+    //   const contract = new ethers.Contract(contractAddress, contractABI, provider);
+    //   contract.on('CardMinted', (to, tokenId, collectionId, cardNumber, event) => {
+    //     console.log(`NFT Minted! Token ID: ${tokenId}, Collection ID: ${collectionId}, Card Number: ${cardNumber}`);
+        
+    //     if (to.toLowerCase() === window.ethereum.selectedAddress.toLowerCase()) {
+    //       // Notify the user only if the NFT is minted to their address
+    //       setNotification(`You have received a new NFT: Token ID ${tokenId} from Collection ${collectionId}!`);
+    //     }
+    //   });
+    // }
+    // listenForEvent()
   }, []);
 
   const fetchMintedUsers = async () => {
@@ -40,8 +56,14 @@ const MintCardModal: React.FC<MintCardModalProps> = ({ cards, collectionId, clos
         collectionId,
         cardNumbers: cards.map(card => card.number)
       });
-      closeModal();
+
+      setNotification({ type: 'success', message: `Minting succeeded! ${cards.length} cards minted to address: ${userAddress}` });
+      console.log(notification);
+      setTimeout(() => {
+        closeModal(); // Close the modal after a delay
+      }, 5000); // 3-second delay
     } catch (error) {
+      setNotification({ type: 'error', message: 'Minting failed. Please try again.' });
       console.error('Error minting cards:', error);
     }
   };
@@ -104,6 +126,11 @@ const MintCardModal: React.FC<MintCardModalProps> = ({ cards, collectionId, clos
 
         <button onClick={mintCards} disabled={cards.length === 0}>Mint Selected Cards</button>
         <button onClick={closeModal}>Fermer</button>
+        {notification && (
+          <div className={`notification ${notification.type}`}>
+            {notification.message}
+          </div>
+        )}
       </div>
     </div>
   );

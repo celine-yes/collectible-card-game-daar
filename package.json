@@ -13,6 +13,7 @@
     "concurrently": "^9.0.1"
   },
   "dependencies": {
+    "@metamask/providers": "^18.1.0",
     "axios": "^1.7.7",
     "ethers": "^6.13.4",
     "express": "^4.21.1"

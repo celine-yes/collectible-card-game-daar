@@ -257,7 +257,7 @@ button:hover {
   }
 }
 
-/* Modal Styles */
+/* MintCardModal Styles */
 .modal {
   position: fixed;
   top: 50%;
@@ -269,6 +269,7 @@ button:hover {
   z-index: 1000;
   width: 400px;
   border-radius: 8px;
+  text-align: center;
 }
 
 .modal-content {
@@ -292,4 +293,21 @@ button:hover {
 
 .modal-content button:hover {
   background-color: #0056b3;
+}
+
+/* Notification Styles */
+.notification {
+  background-color: #4caf50; /* Success */
+  color: white;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.notification.error {
+  background-color: #f44336; /* Error */
+}
+
+.notification.success {
+  background-color: #4caf50; /* Success */
 }
