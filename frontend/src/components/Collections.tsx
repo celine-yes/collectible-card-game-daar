@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useWallet } from '../hooks/useWallet';
 import axios from 'axios';
 import '../css/Collections.css';
 import MintNFT from './MintNFT';
@@ -17,7 +18,9 @@ interface Card {
   imageUrl: string;
 }
 
+
 const CollectionManager: React.FC = () => {
+  const { isOwner, walletConnected, checkOwnership } = useWallet();
   const [collections, setCollections] = useState<Collection[]>([]);
   // const [newCollectionName, setNewCollectionName] = useState('');
   // const [newCollectionCardCount, setNewCollectionCardCount] = useState('');
@@ -25,11 +28,14 @@ const CollectionManager: React.FC = () => {
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
+  //for minting card
   const [showModal, setShowModal] = useState(false);
 
+
   useEffect(() => {
-    fetchCollections();
+    fetchCollections(); 
   }, []);
+
 
   const fetchCollections = async () => {
     try {
@@ -91,18 +97,9 @@ const CollectionManager: React.FC = () => {
     setShowModal(true);
   };
 
-  const resetCardSelection = () => {
-    setSelectedCards([]);
-  };
-
-  const handleCloseModal = () => {
-    setShowModal(false);
-    resetCardSelection();
-  };
-
   return (
     <div className="collections-page">
-      {!isInitialized && (
+      {!isInitialized && isOwner && (
         <button onClick={initializePokemonSets}>Initialize Pokemon Sets</button>
       )}
 
@@ -157,7 +154,7 @@ const CollectionManager: React.FC = () => {
         <MintNFT
           cards={selectedCards}
           collectionId={selectedCollection!.id}
-          closeModal={handleCloseModal}
+          closeModal={() => setShowModal(false)}
         />
       )}
     </div>

@@ -15,7 +15,7 @@ contract Booster is ERC721, Ownable {
     mapping(uint256 => BoosterContent) public boosters;
     uint256 private _nextBoosterId;
 
-    event BoosterCreated(uint256 indexed boosterId, address indexed owner);
+    event BoosterCreated(uint256 boosterId, address owner);
     event BoosterOpened(uint256 indexed boosterId, address indexed owner);
 
     constructor(address _mainContractAddress) ERC721("TCG Booster", "TCGB") Ownable(msg.sender) {
@@ -23,12 +23,14 @@ contract Booster is ERC721, Ownable {
         _nextBoosterId = 1;
     }
 
-    function createBooster(address to) external onlyOwner {
+    function createBooster() external returns (uint256) {
         uint256 newBoosterId = _nextBoosterId++;
-        _safeMint(to, newBoosterId);
+        _safeMint(msg.sender, newBoosterId);
         boosters[newBoosterId] = BoosterContent({opened: false});
-        emit BoosterCreated(newBoosterId, to);
+        emit BoosterCreated(newBoosterId, msg.sender);
+        return newBoosterId;
     }
+
 
     function openBooster(uint256 boosterId) external {
         require(ownerOf(boosterId) == msg.sender, "Not the owner of this booster");

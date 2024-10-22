@@ -48,12 +48,13 @@ contract TCG is ERC721, Ownable {
         for (uint i = 0; i < cardIds.length; i++) {
             uint256 collectionId = cardIds[i] / 1000; // Exemple de calcul de l'ID de collection
             uint256 cardNumber = cardIds[i] % 1000; // Exemple de calcul du numéro de carte
-            mintCard(to, collectionId, cardNumber);
+            _mintCard(to, collectionId, cardNumber); // Appeler la fonction interne sans restriction
         }
 
         // Effacer les données du booster après l'avoir ouvert
         delete boosterCards[boosterId];
     }
+
 
     // Adresse du contrat Booster
     address public boosterContract;
@@ -72,7 +73,7 @@ contract TCG is ERC721, Ownable {
         collectionIdTracker++;
     }
 
-    function mintCard(address _to, uint256 _collectionId, uint256 _cardNumber) public onlyOwner {
+    function _mintCard(address _to, uint256 _collectionId, uint256 _cardNumber) internal {
         require(_collectionId < collectionIdTracker, "Collection does not exist");
         require(_cardNumber < collections[_collectionId].cardCount, "Invalid card number");
 
@@ -91,6 +92,12 @@ contract TCG is ERC721, Ownable {
 
         emit CardMinted(_to, tokenId, _collectionId, _cardNumber);
     }
+
+
+    function mintCard(address _to, uint256 _collectionId, uint256 _cardNumber) public onlyOwner {
+        _mintCard(_to, _collectionId, _cardNumber);
+    }
+
 
     function batchMintCards(address[] memory _to, uint256[] memory _collectionIds, uint256[] memory _cardNumbers) public onlyOwner {
         require(_to.length == _collectionIds.length && _to.length == _cardNumbers.length, "Input arrays must have the same length");

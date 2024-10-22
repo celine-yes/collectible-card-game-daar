@@ -6,6 +6,7 @@ import * as main from '@/lib/main'
 import Collections from './components/Collections';
 import MintedUsers from './components/MintedUsers';
 import MintNFT from './components/MintNFT';
+import Boosters from './components/Boosters';
 import './css/App.css';
 
 //Gestion de Metamask et du contrat
@@ -54,6 +55,7 @@ const Sidebar = () => (
       <li><Link to="/">Accueil</Link></li>
       <li><Link to="/collections">Collections</Link></li>
       <li><Link to="/minted-users">Utilisateurs</Link></li>
+      <li><Link to="/boosters">Boosters</Link></li>
     </ul>
   </div>
 );
@@ -78,6 +80,7 @@ export const App = () => {
             } />
             <Route path="/collections" element={<Collections />} />
             <Route path="/minted-users" element={<MintedUsers />} />
+            <Route path="/boosters" element={<Boosters />} />
           </Routes>
         </div>
       </div>
