@@ -18,17 +18,14 @@ interface Card {
   imageUrl: string;
 }
 
-
 const CollectionManager: React.FC = () => {
-  const { isOwner, walletConnected, checkOwnership } = useWallet();
+  const { isOwner } = useWallet();
   const [collections, setCollections] = useState<Collection[]>([]);
-  // const [newCollectionName, setNewCollectionName] = useState('');
-  // const [newCollectionCardCount, setNewCollectionCardCount] = useState('');
   const [isInitialized, setIsInitialized] = useState(false);
   const [selectedCollection, setSelectedCollection] = useState<Collection | null>(null);
   const [cards, setCards] = useState<Card[]>([]);
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
-  //for minting card
+  //formulaire for minting card
   const [showModal, setShowModal] = useState(false);
 
 
@@ -46,21 +43,6 @@ const CollectionManager: React.FC = () => {
       console.error('Error fetching collections:', error);
     }
   };
-
-  // const createCollection = async (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   try {
-  //     await axios.post('http://localhost:3000/create-collection', {
-  //       name: newCollectionName,
-  //       cardCount: parseInt(newCollectionCardCount)
-  //     });
-  //     setNewCollectionName('');
-  //     setNewCollectionCardCount('');
-  //     fetchCollections();
-  //   } catch (error) {
-  //     console.error('Error creating collection:', error);
-  //   }
-  // };
 
   const initializePokemonSets = async () => {
     try {
@@ -102,7 +84,10 @@ const CollectionManager: React.FC = () => {
       {!isInitialized && isOwner && (
         <button onClick={initializePokemonSets}>Initialize Pokemon Sets</button>
       )}
-
+      
+      {!isOwner && (
+      <p>You are not the owner of this collection. </p>
+      )}
       <h2>Collections</h2>
       <div className="collections-grid">
         {collections.map((collection) => (
@@ -154,7 +139,10 @@ const CollectionManager: React.FC = () => {
         <MintNFT
           cards={selectedCards}
           collectionId={selectedCollection!.id}
-          closeModal={() => setShowModal(false)}
+          closeModal={() => {
+            setShowModal(false);
+            setSelectedCards([]);
+          }}
         />
       )}
     </div>

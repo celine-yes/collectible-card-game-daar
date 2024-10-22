@@ -1,36 +1,33 @@
-Collections.tsx
-
+/* Collections.tsx */
 .collections-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  
-  .card {
-    background-color: #f8f8ff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    width: 200px;
-    text-align: center;
-    border: 2px solid transparent;
-    transition: border-color 0.3s ease;
-    cursor: pointer;
-  }
-  
-  .card img {
-    width: 100%;
-    height: auto;
-    border-radius: 5px;
-  }
-  
-  .card h2 {
-    font-size: 18px;
-    color: #1e90ff;
-  }
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.card {
+  background-color: #f8f8ff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 200px;
+  text-align: center;
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}
+
+.card h2 {
+  font-size: 18px;
+  color: #1e90ff;
+}
 
 .collections-page {
   padding: 20px;
+  background-color: #f8f8ff; /* Uniform background for the main area */
 }
 
 .create-collection-form {
@@ -110,24 +107,24 @@ Collections.tsx
 .cards-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px; /* Augmentez l'espace entre les cartes */
+  gap: 30px; /* Space between cards */
   justify-content: flex-start;
 }
 
 .card {
-  width: calc(25% - 30px); /* 4 cartes par ligne, en tenant compte de l'espace entre elles */
-  max-width: 270px; /* Augmentez la taille maximale d'une carte */
+  width: calc(25% - 30px); /* 4 cards per row */
+  max-width: 270px; 
   background-color: #f8f8ff;
-  border-radius: 12px; /* Augmentez légèrement le rayon de bordure */
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Augmentez légèrement l'ombre */
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); 
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease; /* Ajoutez une transition pour un effet au survol */
+  transition: transform 0.3s ease;
 }
 
 .card:hover {
-  transform: scale(1.05); /* Effet de zoom au survol */
+  transform: scale(1.05);
 }
 
 .card img {
@@ -137,99 +134,32 @@ Collections.tsx
 }
 
 .card-info {
-  padding: 15px; /* Augmentez le padding */
+  padding: 15px;
   text-align: center;
 }
 
 .card-info p {
-  margin: 8px 0; /* Augmentez légèrement la marge */
-  font-size: 16px; /* Augmentez la taille de la police */
+  margin: 8px 0; 
+  font-size: 16px;
 }
 
 /* Responsive design */
 @media (max-width: 1400px) {
   .card {
-    width: calc(33.33% - 30px); /* 3 cartes par ligne */
+      width: calc(33.33% - 30px);
   }
 }
 
 @media (max-width: 1000px) {
   .card {
-    width: calc(50% - 30px); /* 2 cartes par ligne */
+      width: calc(50% - 30px);
   }
 }
 
 @media (max-width: 600px) {
   .card {
-    width: 100%; /* 1 carte par ligne */
-    max-width: 300px; /* Augmentez la taille maximale pour les petits écrans */
-    margin: 0 auto; /* Centrez la carte sur les petits écrans */
+      width: 100%;
+      max-width: 300px;
+      margin: 0 auto;
   }
-}
-
-/* Style de la modale */
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background-color: white;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1000;
-  width: 400px;
-  border-radius: 8px;
-}
-
-.modal-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.modal-content h2 {
-  margin-bottom: 20px;
-}
-
-.modal-content button {
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.modal-content button:hover {
-  background-color: #0056b3;
-}
-
-.mint-button {
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.mint-button:hover {
-  background-color: #45a049;
-}
-
-.mint-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.card.selected {
-  border-color: #4CAF50;  /* Couleur verte */
-  box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);  /* Ombre verte */
-}
-
-.card:hover {
-  border-color: #4CAF50;  /* Couleur verte au survol */
 }
