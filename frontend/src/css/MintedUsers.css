@@ -3,55 +3,66 @@
     display: flex;
     flex-direction: column;
     gap: 20px;
-  }
-  
-  .user-card {
-    border: 1px solid #ddd;
+}
+
+.user-card {
+    border: 1px solid rgba(221, 221, 221, 0.7);
     padding: 15px;
     border-radius: 8px;
-  }
-  
-  .user-address {
+    background-color: rgba(255, 255, 255, 0.7); /* Fond blanc semi-transparent */
+}
+
+.user-address {
     cursor: pointer;
     padding: 10px;
-    background-color: #f0f0f0;
+    background-color: rgba(240, 240, 240, 0.7);
     border-radius: 5px;
-  }
-  
-  .user-address:hover {
-    background-color: #e0e0e0;
-  }
-  
-  .nft-list {
+}
+
+.user-address:hover {
+    background-color: rgba(224, 224, 224, 0.8);
+}
+
+.nft-list {
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
     margin-top: 15px;
-  }
-  
-  .nft-card {
-    border: 1px solid #eee;
+}
+
+.nft-card {
+    border: 1px solid rgba(238, 238, 238, 0.7);
     padding: 10px;
     border-radius: 5px;
     width: 200px;
-  }
-  
-  .nft-card img {
+    background-color: rgba(255, 255, 255, 0.6); /* Fond blanc semi-transparent */
+}
+
+.nft-card img {
     width: 100%;
     height: auto;
-  }
-  
-  .user-card h2 {
+}
+
+.user-card h2 {
     font-size: 18px;
     color: #1e90ff;
-  }
-  
-  .nft-card h3 {
+}
+
+.nft-card h3 {
     font-size: 14px;
-    color: #333;
-  }
-  
-  .user-card p, .nft-card p {
+    color: rgba(51, 51, 51, 0.9);
+}
+
+.user-card p, .nft-card p {
     font-size: 16px;
-    color: #333;
-  }
+    color: rgba(51, 51, 51, 0.9);
+}
+
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    font-size: 18px;
+    color: #3D7DCA;
+}

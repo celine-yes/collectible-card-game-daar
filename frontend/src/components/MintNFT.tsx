@@ -3,6 +3,8 @@ import { ethers } from 'ethers';
 import { TCG_CONTRACT_ADDRESS } from '../config';
 import TCGJSON from '@/abis/TCG.json';
 import { useWallet } from '../hooks/useWallet';
+import '../css/MintNFT.css';
+// ... reste du code ...
 
 interface Card {
   id: string;

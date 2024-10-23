@@ -5,9 +5,11 @@ import * as ethereum from '@/lib/ethereum'
 import * as main from '@/lib/main'
 import Collections from './components/Collections';
 import MintedUsers from './components/MintedUsers';
+import Home from './components/Home';
 import MintNFT from './components/MintNFT';
 import Boosters from './components/Boosters';
 import './css/App.css';
+import welcomeImage from '../public/Bienvenue-sur-PokemonTCG-10-23-2024.png';
 
 //Gestion de Metamask et du contrat
 type Canceler = () => void
@@ -68,16 +70,7 @@ export const App = () => {
         <Sidebar />
         <div className='main-container'> 
           <Routes>
-          <Route path="/" element={
-              <div className={styles.body}>
-                <h1>Bienvenue sur Pokémon TCG</h1>
-                {/* {wallet ? (
-                  <p>Adresse de l'utilisateur : {wallet.details?.account}</p>
-                ) : (
-                  <p>Connecté à Metamask</p>
-                )} */}
-              </div>
-            } />
+            <Route path="/" element={<Home />} />
             <Route path="/collections" element={<Collections />} />
             <Route path="/minted-users" element={<MintedUsers />} />
             <Route path="/boosters" element={<Boosters />} />

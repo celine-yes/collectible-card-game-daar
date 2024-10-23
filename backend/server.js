@@ -19,7 +19,9 @@ if (!process.env.RPC_URL || !process.env.PRIVATE_KEY || !process.env.POKEMON_TCG
 const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 const contract = new ethers.Contract(contractAddress, contractAbi, signer);
-const boosterContract = new ethers.Contract(boosterContractAddress, boosterContractAbi, signer);
+
+let potentialBoosters = []; // Variable globale pour stocker les boosters potentiels
+
 
 // Au début de server.js
 const defaultSets = [
@@ -118,130 +120,6 @@ app.get('/collection-cards/:collectionId', async (req, res) => {
   }
 });
 
-// Route pour récupérer les NFTs d'un utilisateur
-app.get('/user-nfts/:userAddress', async (req, res) => {
-  try {
-    const { userAddress } = req.params;
-    const tokenIds = await contract.getNFTsOfUser(userAddress);
-    const nfts = await Promise.all(tokenIds.map(async (tokenId) => {
-      const [collectionName, cardNumber] = await contract.getCard(tokenId);
-      
-      // Récupérer les détails de la carte depuis l'API Pokémon TCG
-      let cardDetails = {};
-      try {
-        const response = await axios.get(`https://api.pokemontcg.io/v2/cards`, {
-          headers: { 'X-Api-Key': process.env.POKEMON_TCG_API_KEY },
-          params: { q: `set.name:"${collectionName}" number:${cardNumber}` }
-        });
-        if (response.data.data && response.data.data.length > 0) {
-          const card = response.data.data[0];
-          cardDetails = {
-            name: card.name,
-            imageUrl: card.images.small,
-            cardId: card.id
-          };
-        }
-      } catch (error) {
-        console.error('Erreur lors de la récupération des détails de la carte:', error);
-      }
-
-      return {
-        tokenId: tokenId.toString(),
-        collectionName,
-        cardNumber: cardNumber.toString(),
-        ...cardDetails
-      };
-    }));
-    res.json(nfts);
-  } catch (error) {
-    console.error('Erreur lors de la récupération des NFTs de l\'utilisateur:', error);
-    res.status(500).json({ error: 'Erreur serveur lors de la récupération des NFTs' });
-  }
-});
-
-app.post('/mint-nft', async (req, res) => {
-  console.log('Requête reçue pour mint un NFT');
-  const { userAddress, collectionId, cardNumber } = req.body;
-  console.log('userAddress :', userAddress);
-
-  if (!userAddress || collectionId === undefined || cardNumber === undefined) {
-    console.log('Paramètres manquants:', req.body);
-    return res.status(400).json({ error: 'Paramètres manquants' });
-  }
-
-  try {
-    // Afficher l'adresse du propriétaire du contrat
-    const ownerAddress = await contract.owner();
-    console.log('Adresse du propriétaire du contrat :', ownerAddress);
-
-    // Afficher l'adresse du signataire (celui qui exécute la transaction)
-    const signerAddress = await signer.getAddress();
-    console.log('Adresse du signataire :', signerAddress);
-
-    console.log('Appel du contrat pour mint une carte...');
-    const tx = await contract.mintCard(userAddress, collectionId, cardNumber);
-    await tx.wait();
-    console.log('Transaction confirmée !');
-
-    const nfts = await contract.getNFTsOfUser(userAddress);
-    console.log('NFTs de l\'utilisateur après mint:', nfts);
-    console.log(`NFT minté avec succès à l'utilisateur ${userAddress}`);
-
-    res.json({ 
-      success: true, 
-      message: `NFT minté avec succès à l'utilisateur ${userAddress}`,
-      ownerAddress: ownerAddress,
-      signerAddress: signerAddress
-    });
-  } catch (error) {
-    console.error('Erreur lors du mint du NFT:', error);
-    res.status(500).json({ success: false, error: 'Erreur serveur lors du mint du NFT' });
-  }
-});
-
-app.get('/minted-users', async (req, res) => {
-  try {
-    const mintedUsers = await contract.getAllMintedUsers(); 
-    res.json(mintedUsers);
-  } catch (error) {
-    console.error('Erreur lors de la récupération des utilisateurs:', error);
-    res.status(500).json({ error: 'Erreur serveur lors de la récupération des utilisateurs.' });
-  }
-});
-
-app.post('/mint-nfts', async (req, res) => {
-  console.log('Requête reçue pour mint plusieurs NFTs');
-  const { userAddress, collectionId, cardNumbers } = req.body;
-  console.log('userAddress :', userAddress);
-
-  if (!userAddress || collectionId === undefined || !cardNumbers || !Array.isArray(cardNumbers)) {
-    console.log('Paramètres manquants ou invalides:', req.body);
-    return res.status(400).json({ error: 'Paramètres manquants ou invalides' });
-  }
-
-  try {
-    console.log('Appel du contrat pour mint plusieurs cartes...');
-    const tx = await contract.batchMintCards(
-      Array(cardNumbers.length).fill(userAddress),
-      Array(cardNumbers.length).fill(collectionId),
-      cardNumbers
-    );
-    await tx.wait();
-    console.log('Transaction confirmée !');
-
-    const nfts = await contract.getNFTsOfUser(userAddress);
-    console.log('NFTs de l\'utilisateur après mint:', nfts);
-    console.log(`${cardNumbers.length} NFTs mintés avec succès à l'utilisateur ${userAddress}`);
-
-    res.json({ 
-      success: true, 
-      message: `${cardNumbers.length} NFTs mintés avec succès à l'utilisateur ${userAddress}`
-    });
-  } catch (error) {
-    console.error('Erreur lors du mint des NFTs:', error);
-    res.status(500).json({ success: false, error: 'Erreur serveur lors du mint des NFTs' });
-  }
-});
 
 async function addPokemonSet(setId) {
   try {
@@ -275,32 +153,6 @@ app.post('/initialize-pokemon-sets', async (req, res) => {
   }
 });
 
-// Route pour créer un booster
-app.post('/create-booster', async (req, res) => {
-  const { to } = req.body;
-  try {
-    const tx = await boosterContract.createBooster(to);
-    await tx.wait();
-    res.json({ success: true, message: 'Booster créé avec succès' });
-  } catch (error) {
-    console.error('Erreur lors de la création du booster:', error);
-    res.status(500).json({ success: false, error: 'Erreur serveur lors de la création du booster' });
-  }
-});
-
-// // Route pour définir le contenu d'un booster
-// app.post('/set-booster-content', async (req, res) => {
-//   const { boosterId, cardIds } = req.body;
-//   try {
-//     const tx = await contract.setBoosterCards(boosterId, cardIds);
-//     await tx.wait();
-//     res.json({ success: true, message: 'Contenu du booster défini avec succès' });
-//   } catch (error) {
-//     console.error('Erreur lors de la définition du contenu du booster:', error);
-//     res.status(500).json({ success: false, error: 'Erreur serveur lors de la définition du contenu du booster' });
-//   }
-// });
-
 
 app.post('/set-booster-content', async (req, res) => {
   const { boosterId, collectionId, userAddress } = req.body;
@@ -322,38 +174,6 @@ app.post('/set-booster-content', async (req, res) => {
   } catch (error) {
     console.error('Erreur lors de la définition du contenu du booster:', error);
     res.status(500).json({ success: false, error: 'Erreur serveur lors de la définition du contenu du booster' });
-  }
-});
-
-
-// Route pour ouvrir un booster
-app.post('/open-booster', async (req, res) => {
-  const { userAddress, boosterId } = req.body;
-  try {
-    //vérifier l'utilisateur est le propriétaire du booster
-    const owner = await boosterContract.ownerOf(boosterId);
-    if (owner.toLowerCase() !== userAddress.toLowerCase()) {
-      throw new Error('Vous n\'êtes pas le propriétaire de ce booster');
-    }
-
-    console.log('Ouverture du booster:', boosterId, 'pour l\'utilisateur:', userAddress);
-    const tx = await boosterContract.connect(signer).openBooster(boosterId);
-    console.log('Transaction envoyée:', tx.hash);
-    const receipt = await tx.wait();
-    console.log('Transaction confirmée');
-
-    // Récupérer le contenu du booster
-    const boosterContent = await contract.getBoosterCards(boosterId);
-
-    res.json({ 
-      success: true, 
-      message: 'Booster ouvert avec succès', 
-      boosterId: boosterId.toString(),
-      cards: boosterContent
-    });
-  } catch (error) {
-    console.error('Erreur lors de l\'ouverture du booster:', error);
-    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -404,7 +224,6 @@ async function generateBoosterContent(collectionId, collectionName, cardCount) {
   }
 }
 
-let potentialBoosters = []; // Variable globale pour stocker les boosters potentiels
 
 app.post('/generate-boosters-for-all-collections', async (req, res) => {
   try {
@@ -449,63 +268,6 @@ app.post('/generate-boosters-for-all-collections', async (req, res) => {
   } catch (error) {
     console.error('Erreur lors de la génération des boosters potentiels:', error);
     res.status(500).json({ success: false, error: 'Erreur serveur lors de la génération des boosters potentiels' });
-  }
-});
-
-// Nouvelle route pour réclamer un booster
-app.post('/claim-booster', async (req, res) => {
-  const { userAddress, collectionId } = req.body;
-  try {
-    // Trouver le booster pré-généré pour cette collection
-    const booster = potentialBoosters.find(b => b.collectionId === collectionId);
-    if (!booster) {
-      throw new Error('Booster non trouvé pour cette collection');
-    }
-
-    console.log('Création du booster pour:', userAddress);
-    const tx = await boosterContract.createBooster(userAddress);
-    console.log('Transaction envoyée:', tx.hash);
-    const receipt = await tx.wait();
-    console.log('Transaction confirmée');
-    
-    console.log('Receipt complet:', JSON.stringify(receipt, null, 2));
-    
-    if (!receipt.logs || receipt.logs.length === 0) {
-      throw new Error('Aucun log d\'événement trouvé dans la transaction');
-    }
-    
-    const boosterCreatedLog = receipt.logs.find(log => {
-      try {
-        const decoded = boosterContract.interface.parseLog(log);
-        return decoded.name === 'BoosterCreated';
-      } catch (e) {
-        return false;
-      }
-    });
-    
-    if (!boosterCreatedLog) {
-      throw new Error('BoosterCreated event not found in transaction logs');
-    }
-    
-    const decodedLog = boosterContract.interface.parseLog(boosterCreatedLog);
-    const boosterId = decodedLog.args.boosterId;
-    console.log('Booster ID:', boosterId);
-
-    // Utiliser le contenu pré-généré du booster
-    const boosterContent = booster.cards;
-
-    // Définir le contenu du booster
-    await contract.setBoosterCards(boosterId, boosterContent);
-
-    res.json({ 
-      success: true, 
-      message: 'Booster réclamé avec succès', 
-      boosterId: boosterId.toString(),
-      cards: boosterContent
-    });
-  } catch (error) {
-    console.error('Erreur détaillée lors de la réclamation du booster:', error);
-    res.status(500).json({ success: false, error: 'Erreur serveur lors de la réclamation du booster' });
   }
 });
 

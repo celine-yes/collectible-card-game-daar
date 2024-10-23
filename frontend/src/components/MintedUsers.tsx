@@ -19,9 +19,11 @@ interface User {
 const MintedUsers = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [openUser, setOpenUser] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Récupère les utilisateurs et leurs NFTs depuis le backend
   const fetchMintedUsers = async () => {
+    setIsLoading(true);
     try {
       const response = await axios.get('http://localhost:3000/minted-users');
       const mintedAddresses = response.data;
@@ -34,6 +36,8 @@ const MintedUsers = () => {
       setUsers(usersWithNFTs);
     } catch (error) {
       console.error('Erreur lors de la récupération des utilisateurs mintés', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -48,6 +52,10 @@ const MintedUsers = () => {
       setOpenUser(address);
     }
   };
+
+  if (isLoading) {
+    return <div className="loading">Chargement des utilisateurs...</div>;
+  }
 
   return (
     <div>
