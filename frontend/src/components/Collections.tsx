@@ -29,6 +29,8 @@ const CollectionManager: React.FC = () => {
   const [isLoadingCollections, setIsLoadingCollections] = useState(false);
   const [isLoadingCards, setIsLoadingCards] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchCollections();
@@ -74,7 +76,8 @@ const CollectionManager: React.FC = () => {
   const handleCollectionClick = (collection: Collection) => {
     setSelectedCollection(collection);
     setCards([]); // Réinitialiser les cartes
-    fetchCollectionCards(collection.id);
+    fetchCollectionCards(collection.id); 
+    setCurrentPage(1);
   };
 
   const toggleCardSelection = (card: Card) => {
@@ -89,6 +92,17 @@ const CollectionManager: React.FC = () => {
     console.log("Opening mint modal"); // Ajoutez ce log pour déboguer
     setShowModal(true);
   };
+
+  // Pagination
+  const cardsPerPage = 10;
+  const indexOfLastCard = currentPage * cardsPerPage;
+  const indexOfFirstCard = indexOfLastCard - cardsPerPage;
+  const currentCards = cards.slice(indexOfFirstCard, indexOfLastCard);
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Recherche des cartes
+  const filteredCards = currentCards.filter((card) => card.name.toLowerCase().includes(searchTerm.toLowerCase()));
 
   return (
     <>
@@ -123,21 +137,30 @@ const CollectionManager: React.FC = () => {
 
         {selectedCollection && (
           <div className="collection-details">
-            <h3>{selectedCollection.name} Cards</h3>
-            <div className="mint-section">
-              <button 
-                onClick={handleMintClick} 
-                disabled={selectedCards.length === 0}
-                className="mint-button"
-              >
-                Mint Selected Cards ({selectedCards.length})
-              </button>
-            </div>
+          <h3>{selectedCollection.name} Cards</h3>
+            
+            <div className="action-bar">
+            <input
+              type="text"
+              placeholder="Rechercher une carte..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+            <button 
+              onClick={handleMintClick} 
+              disabled={selectedCards.length === 0}
+              className="mint-button"
+            >
+              Mint Selected Cards ({selectedCards.length})
+            </button>
+          </div>
             {isLoadingCards ? (
               <div className="loading">Loading cards...</div>
             ) : (
+              <>
               <div className="cards-grid">
-                {cards.map((card) => (
+                {filteredCards.map((card) => (
                   <div 
                     key={card.id} 
                     className={`card ${selectedCards.some(c => c.id === card.id) ? 'selected' : ''}`}
@@ -151,9 +174,17 @@ const CollectionManager: React.FC = () => {
                   </div>
                 ))}
               </div>
-            )}
-          </div>
+              <div className="pagination">
+              {[...Array(Math.ceil(cards.length / cardsPerPage)).keys()].map((number) => (
+                <button key={number} onClick={() => paginate(number + 1)}>
+                  {number + 1}
+                </button>
+              ))}
+            </div>
+        </>
         )}
+      </div>
+      )}
       </div>
       {showModal && (
         <MintNFT

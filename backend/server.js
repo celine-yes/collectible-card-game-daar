@@ -22,15 +22,27 @@ const contract = new ethers.Contract(contractAddress, contractAbi, signer);
 
 let potentialBoosters = []; // Variable globale pour stocker les boosters potentiels
 
-
-// Au début de server.js
 const defaultSets = [
-  'sv7', 'sv6pt5'
-  /*, 'swsh6',
-  'sm12', 'sm11', 'sm10', 
-  'xy12', 'xy11', 'xy10', 
-  'bw11', 'bw10', 'bw9',*/
+  'base1',    
+  'base2',   
+  'neo1',   
+  'ex8',     
+  'ex12',    
+  'dp1',     
+  'hgss1',   
+  'bw11',    
+  'xy12',    
+  'sm12',     
+  'swsh4',   
+  'swsh7',   
+  'swsh9',   
+  'swsh10',  
+  'sv1',     
+  'sv2',     
+  'sv3',      
+  'sv7',      
 ];
+
 
 // Route pour récupérer toutes les collections disponibles
 app.get('/collections', async (req, res) => {
