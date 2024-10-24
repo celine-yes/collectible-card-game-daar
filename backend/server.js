@@ -178,6 +178,59 @@ app.post('/set-booster-content', async (req, res) => {
 });
 
 
+app.get('/minted-users', async (req, res) => {
+  try {
+    const mintedUsers = await contract.getAllMintedUsers(); 
+    res.json(mintedUsers);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des utilisateurs:', error);
+    res.status(500).json({ error: 'Erreur serveur lors de la récupération des utilisateurs.' });
+  }
+});
+
+// Route pour récupérer les NFTs d'un utilisateur
+app.get('/user-nfts/:userAddress', async (req, res) => {
+  try {
+    const { userAddress } = req.params;
+    const tokenIds = await contract.getNFTsOfUser(userAddress);
+    const nfts = await Promise.all(tokenIds.map(async (tokenId) => {
+      const [collectionName, cardNumber] = await contract.getCard(tokenId);
+      
+      // Récupérer les détails de la carte depuis l'API Pokémon TCG
+      let cardDetails = {};
+      try {
+        const response = await axios.get(`https://api.pokemontcg.io/v2/cards`, {
+          headers: { 'X-Api-Key': process.env.POKEMON_TCG_API_KEY },
+          params: { q: `set.name:"${collectionName}" number:${cardNumber}` }
+        });
+        if (response.data.data && response.data.data.length > 0) {
+          const card = response.data.data[0];
+          cardDetails = {
+            name: card.name,
+            imageUrl: card.images.small,
+            cardId: card.id
+          };
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des détails de la carte:', error);
+      }
+
+      return {
+        tokenId: tokenId.toString(),
+        collectionName,
+        cardNumber: cardNumber.toString(),
+        ...cardDetails
+      };
+    }));
+    res.json(nfts);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des NFTs de l\'utilisateur:', error);
+    res.status(500).json({ error: 'Erreur serveur lors de la récupération des NFTs' });
+  }
+});
+
+
+
 // Fonction pour générer un contenu aléatoire pour un booster
 async function generateBoosterContent(collectionId, collectionName, cardCount) {
   try {

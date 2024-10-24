@@ -26,32 +26,32 @@ contract TCG is ERC721, Ownable {
     mapping(uint => uint) public tokenCollection;
 
     address[] public mintedUsers; 
-    mapping(address => bool) public hasMinted; // Pour vérifier si un utilisateur a déjà reçu un NFT
+    mapping(address => bool) public hasMinted; // vérifie si un utilisateur a déjà reçu un NFT
 
     event CollectionCreated(uint indexed collectionId, string name, uint256 cardCount);
     event CardMinted(address indexed to, uint256 indexed tokenId, uint256 indexed collectionId, uint256 cardNumber);
 
-    // Mapping pour stocker les cartes de chaque booster
+    //mapping pour stocker les cartes de chaque booster
     mapping(uint256 => uint256[]) private boosterCards;
 
-    // Fonction pour définir les cartes d'un booster (appelée par le propriétaire ou un contrat autorisé)
+    // définir les cartes d'un booster (appelée par le propriétaire ou un contrat autorisé)
     function setBoosterCards(uint256 boosterId, uint256[] memory cardIds) external onlyOwner {
         boosterCards[boosterId] = cardIds;
     }
 
-    // Fonction pour minter les cartes d'un booster
+    // minter les cartes d'un booster
     function mintBoosterCards(address to, uint256 boosterId) external {
         require(msg.sender == address(boosterContract), "Only booster contract can call this function");
         uint256[] memory cardIds = boosterCards[boosterId];
         require(cardIds.length > 0, "Booster content not set");
 
         for (uint i = 0; i < cardIds.length; i++) {
-            uint256 collectionId = cardIds[i] / 1000; // Exemple de calcul de l'ID de collection
-            uint256 cardNumber = cardIds[i] % 1000; // Exemple de calcul du numéro de carte
-            _mintCard(to, collectionId, cardNumber); // Appeler la fonction interne sans restriction
+            uint256 collectionId = cardIds[i] / 1000;
+            uint256 cardNumber = cardIds[i] % 1000;
+            _mintCard(to, collectionId, cardNumber); //appel la fonction interne sans restriction
         }
 
-        // Effacer les données du booster après l'avoir ouvert
+        //efface les données du booster après l'avoir ouvert
         delete boosterCards[boosterId];
     }
 
@@ -59,7 +59,7 @@ contract TCG is ERC721, Ownable {
     // Adresse du contrat Booster
     address public boosterContract;
 
-    // Fonction pour définir l'adresse du contrat Booster (appelée par le propriétaire)
+    //fonction pour définir l'adresse du contrat Booster (appelée par le propriétaire)
     function setBoosterContract(address _boosterContract) external onlyOwner {
         boosterContract = _boosterContract;
     }
@@ -137,7 +137,7 @@ contract TCG is ERC721, Ownable {
         return (ids, names, cardCounts);
     }
 
-    //fonction pour récupérer les NFTs d'un utilisateur
+    //récupérer les NFTs d'un utilisateur
     function getNFTsOfUser(address user) public view returns (uint256[] memory) {
         uint256 balance = balanceOf(user);
         uint256[] memory tokenIds = new uint256[](balance);

@@ -38,7 +38,7 @@ contract Booster is ERC721, Ownable {
 
         boosters[boosterId].opened = true;
 
-        // Call a function in the main contract to mint the cards
+        //Appel de la fonction du contrat Main pour mint les cartes du booster
         mainContract.mintBoosterCards(msg.sender, boosterId);
 
         emit BoosterOpened(boosterId, msg.sender);

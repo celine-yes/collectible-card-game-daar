@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { ethers } from 'ethers';
-import { TCG_CONTRACT_ADDRESS, BOOSTER_CONTRACT_ADDRESS } from '../config';
-import TCGJSON from '@/abis/TCG.json';
-import BoosterJSON from '@/abis/Booster.json';
+import { useWallet } from '../hooks/useWallet';
+
 
 interface Booster {
   collectionId: string;
@@ -22,75 +20,30 @@ declare global {
 }
 
 const Boosters: React.FC = () => {
+  const { userAddress, signer, boosterContract } = useWallet();
   const [boosters, setBoosters] = useState<Booster[]>([]);
   const [loading, setLoading] = useState(false);
-  const [userAddress, setUserAddress] = useState<string | null>(null);
-  const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null);
-  const [signer, setSigner] = useState<ethers.Signer | null>(null);
   const [boostersInitialized, setBoostersInitialized] = useState(false);
-  const [boosterContract, setBoosterContract] = useState<ethers.Contract | null>(null);
-  const [tcgContract, setTcgContract] = useState<ethers.Contract | null>(null);
 
-  useEffect(() => {
-    const initializeEthers = async () => {
-      if (typeof window !== 'undefined' && window.ethereum) {
-        try {
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
-          setProvider(provider);
-          
-          const signer = provider.getSigner();
-          setSigner(signer);
-          
-          const address = await signer.getAddress();
-          setUserAddress(address);
-
-          } catch (error) {
-          console.error('Erreur lors de l\'initialisation d\'Ethers:', error);
-        }
-      } else {
-        console.log('Ethereum object not found, do you have MetaMask installed?');
-      }
-    };
-    initializeEthers();
-  }, []);
-
-  useEffect(() => {
-    const initializeContracts = async () => {
-      if (provider && signer) {
-        try {
-          const boosterInstance = new ethers.Contract(BOOSTER_CONTRACT_ADDRESS, BoosterJSON, signer);
-          setBoosterContract(boosterInstance);
-
-          const tcgInstance = new ethers.Contract(TCG_CONTRACT_ADDRESS, TCGJSON, signer);
-          setTcgContract(tcgInstance);
-
-          console.log('Contrats initialisés avec succès');
-        } catch (error) {
-          console.error('Erreur lors de l\'initialisation des contrats:', error);
-        }
-      }
-    };
-
-    initializeContracts();
-  }, [provider, signer]);
-
+  //initialiser les boosters en appelant le backend
   const initializeBoosters = async () => {
     setLoading(true);
     try {
       const response = await axios.post('http://localhost:3000/generate-boosters-for-all-collections');
       if (response.data.success) {
         setBoosters(response.data.boosters.map((booster: Booster) => ({ ...booster, isClaimed: false, isOpened: false })));
-        setBoostersInitialized(true); // Marquer les boosters comme initialisés
+        setBoostersInitialized(true);
       }
     } catch (error) {
-      console.error('Error initializing boosters:', error);
+      console.error('Erreur lors de l\'initialisation des boosters:', error);
     }
     setLoading(false);
   };
 
+  //réclamer un booster
   const claimBooster = async (collectionId: string) => {
     if (!userAddress || !boosterContract) {
-      console.error('User address or contracts not available');
+      console.error('Adresse utilisateur ou contrat booster non disponible');
       return;
     }
     setLoading(true);
@@ -100,25 +53,23 @@ const Boosters: React.FC = () => {
 
       console.log('Transaction receipt:', receipt);
 
-      // Trouver l'événement BoosterCreated
       const boosterCreatedEvent = receipt.events?.find((event: any) => event.event === 'BoosterCreated');
 
       if (!boosterCreatedEvent) {
-        console.error('BoosterCreated event not found in transaction receipt');
+        console.error('Événement BoosterCreated non trouvé dans le reçu de transaction');
         setLoading(false);
         return;
       }
 
       console.log('BoosterCreated event args:', boosterCreatedEvent.args);
 
-      // Accéder aux arguments par indice
       const boosterId = boosterCreatedEvent.args[0].toString();
       const owner = boosterCreatedEvent.args[1];
 
       console.log('Booster créé avec ID:', boosterId);
       console.log('Propriétaire du booster:', owner);
 
-      // Appeler le backend pour définir le contenu du booster
+      //appel du backend pour définir le contenu du booster
       const response = await axios.post('http://localhost:3000/set-booster-content', {
         boosterId,
         collectionId,
@@ -131,17 +82,17 @@ const Boosters: React.FC = () => {
         return;
       }
 
-      // Mettre à jour l'état local
       setBoosters(prevBoosters => prevBoosters.map(b => 
         b.collectionId.toString() === collectionId.toString() ? { ...b, isClaimed: true, boosterId } : b
       ));
 
     } catch (error) {
-      console.error('Error claiming booster:', error);
+      console.error('Erreur lors de la réclamation du booster:', error);
     }
     setLoading(false);
   };
 
+  // ouvrir un booster
   const openBooster = async (boosterId: string) => {
     if (!boosterContract || !signer || !userAddress) {
       console.error('Contrat, signer ou adresse utilisateur non disponible');
@@ -151,16 +102,13 @@ const Boosters: React.FC = () => {
     try {
       console.log('Tentative d\'ouverture du booster:', boosterId);
       const gasEstimate = await boosterContract.estimateGas.openBooster(boosterId);
-      
-      // Appeler directement la fonction du contrat
-      const tx = await boosterContract.openBooster(boosterId, {gasLimit: gasEstimate.mul(2)});
+
+      const tx = await boosterContract.openBooster(boosterId, { gasLimit: gasEstimate.mul(2) });
       console.log('Transaction envoyée:', tx.hash);
-      
-      // Attendre la confirmation de la transaction
+
       const receipt = await tx.wait();
       console.log('Transaction confirmée:', receipt);
 
-      // Mettre à jour l'état local
       setBoosters(prevBoosters => prevBoosters.map(booster => 
         booster.boosterId === boosterId ? { ...booster, isOpened: true } : booster
       ));
