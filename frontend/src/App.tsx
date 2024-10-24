@@ -1,15 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { BrowserRouter as Router, Route,  Routes, Link } from 'react-router-dom';
-import styles from './styles.module.css'
 import * as ethereum from '@/lib/ethereum'
 import * as main from '@/lib/main'
 import Collections from './components/Collections';
 import MintedUsers from './components/MintedUsers';
 import Home from './components/Home';
-import MintNFT from './components/MintNFT';
 import Boosters from './components/Boosters';
 import './css/App.css';
-import welcomeImage from '../public/Bienvenue-sur-PokemonTCG-10-23-2024.png';
 
 //Gestion de Metamask et du contrat
 type Canceler = () => void

@@ -57,15 +57,18 @@ export function useWallet() {
         const userAddress_ = await signer_.getAddress();
         const tcgContract_ = new ethers.Contract(TCG_CONTRACT_ADDRESS, TCGJSON, signer_);
         const ownerAddress = await tcgContract_.owner();
-
+  
         const boosterContract_ = new ethers.Contract(BOOSTER_CONTRACT_ADDRESS, BoosterJSON, signer_);
-
+  
         setProvider(provider_);
         setSigner(signer_);
         setUserAddress(userAddress_);
         setTcgContract(tcgContract_);
         setBoosterContract(boosterContract_);
-
+  
+        console.log('tcgContract initialisé :', tcgContract_);
+        console.log('userAddress :', userAddress_);
+  
         setIsOwner(userAddress_.toLowerCase() === ownerAddress.toLowerCase());
         setWalletConnected(true);
       } catch (error) {
@@ -75,6 +78,7 @@ export function useWallet() {
       console.log('Veuillez installer Metamask');
     }
   };
+  
 
   return {
     isOwner,
