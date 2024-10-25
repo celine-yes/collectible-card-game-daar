@@ -30,7 +30,6 @@ const MintCardModal: React.FC<MintCardModalProps> = ({ cards, collectionId, clos
 
   const fetchMintedUsers = async () => {
     try {
-      // Appeler le contrat pour obtenir la liste des utilisateurs mintés
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const contract = new ethers.Contract(TCG_CONTRACT_ADDRESS, TCGJSON, provider);
       const mintedUsers = await contract.getAllMintedUsers();
@@ -61,12 +60,9 @@ const MintCardModal: React.FC<MintCardModalProps> = ({ cards, collectionId, clos
       const collectionIds = cards.map(() => parseInt(collectionId));
       const cardNumbers = cards.map(card => parseInt(card.number));
   
-      // Estimer la limite de gaz
       const gasEstimate = await contract.estimateGas.batchMintCards(toAddresses, collectionIds, cardNumbers);
-      // Ajouter une marge de sécurité (par exemple, 20% de plus)
       const gasLimit = gasEstimate.mul(ethers.BigNumber.from(120)).div(ethers.BigNumber.from(100));
       
-      // Envoyer la transaction avec la limite de gaz spécifiée
       const tx = await contract.batchMintCards(toAddresses, collectionIds, cardNumbers, { gasLimit });
       await tx.wait();
   
@@ -78,7 +74,6 @@ const MintCardModal: React.FC<MintCardModalProps> = ({ cards, collectionId, clos
       if (error.code === 'CALL_EXCEPTION') {
         alert('Transaction échouée : vous n\'êtes pas autorisé à exécuter cette action.');
       } else if (error.code === -32603) {
-        // Affichez les détails de l'erreur
         if (error.data && error.data.message) {
           console.error('Erreur détaillée:', error.data.message);
           alert(`Erreur lors de l'exécution du contrat : ${error.data.message}`);
@@ -90,7 +85,6 @@ const MintCardModal: React.FC<MintCardModalProps> = ({ cards, collectionId, clos
       }
     }
   };
-  
 
   return (
     <div className="modal">

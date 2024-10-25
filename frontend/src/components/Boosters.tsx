@@ -80,7 +80,7 @@ const Boosters: React.FC = () => {
       const response = await axios.post('http://localhost:3000/generate-boosters-for-all-collections');
       if (response.data.success) {
         setBoosters(response.data.boosters.map((booster: Booster) => ({ ...booster, isClaimed: false, isOpened: false })));
-        setBoostersInitialized(true); // Marquer les boosters comme initialisés
+        setBoostersInitialized(true); //marque les boosters comme initialisés
       }
     } catch (error) {
       console.error('Error initializing boosters:', error);
@@ -97,10 +97,8 @@ const Boosters: React.FC = () => {
     try {
       const tx = await boosterContract.createBooster();
       const receipt = await tx.wait();
-
       console.log('Transaction receipt:', receipt);
 
-      // Trouver l'événement BoosterCreated
       const boosterCreatedEvent = receipt.events?.find((event: any) => event.event === 'BoosterCreated');
 
       if (!boosterCreatedEvent) {
@@ -111,14 +109,14 @@ const Boosters: React.FC = () => {
 
       console.log('BoosterCreated event args:', boosterCreatedEvent.args);
 
-      // Accéder aux arguments par indice
+      //accède aux arguments par indice
       const boosterId = boosterCreatedEvent.args[0].toString();
       const owner = boosterCreatedEvent.args[1];
 
       console.log('Booster créé avec ID:', boosterId);
       console.log('Propriétaire du booster:', owner);
 
-      // Appeler le backend pour définir le contenu du booster
+      //appel le backend pour définir le contenu du booster
       const response = await axios.post('http://localhost:3000/set-booster-content', {
         boosterId,
         collectionId,
@@ -131,7 +129,7 @@ const Boosters: React.FC = () => {
         return;
       }
 
-      // Mettre à jour l'état local
+      //met à jour l'état local
       setBoosters(prevBoosters => prevBoosters.map(b => 
         b.collectionId.toString() === collectionId.toString() ? { ...b, isClaimed: true, boosterId } : b
       ));
@@ -152,15 +150,12 @@ const Boosters: React.FC = () => {
       console.log('Tentative d\'ouverture du booster:', boosterId);
       const gasEstimate = await boosterContract.estimateGas.openBooster(boosterId);
       
-      // Appeler directement la fonction du contrat
       const tx = await boosterContract.openBooster(boosterId, {gasLimit: gasEstimate.mul(2)});
       console.log('Transaction envoyée:', tx.hash);
       
-      // Attendre la confirmation de la transaction
       const receipt = await tx.wait();
       console.log('Transaction confirmée:', receipt);
 
-      // Mettre à jour l'état local
       setBoosters(prevBoosters => prevBoosters.map(booster => 
         booster.boosterId === boosterId ? { ...booster, isOpened: true } : booster
       ));

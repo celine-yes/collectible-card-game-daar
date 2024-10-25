@@ -1,12 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-
-//import "./Collection.sol";
 
 
 contract TCG is ERC721, Ownable {
@@ -27,12 +24,11 @@ contract TCG is ERC721, Ownable {
 
     address[] public mintedUsers; 
     mapping(address => bool) public hasMinted; // vérifie si un utilisateur a déjà reçu un NFT
+    //mapping pour stocker les cartes de chaque booster
+    mapping(uint256 => uint256[]) private boosterCards;
 
     event CollectionCreated(uint indexed collectionId, string name, uint256 cardCount);
     event CardMinted(address indexed to, uint256 indexed tokenId, uint256 indexed collectionId, uint256 cardNumber);
-
-    //mapping pour stocker les cartes de chaque booster
-    mapping(uint256 => uint256[]) private boosterCards;
 
     // définir les cartes d'un booster (appelée par le propriétaire ou un contrat autorisé)
     function setBoosterCards(uint256 boosterId, uint256[] memory cardIds) external onlyOwner {

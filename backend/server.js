@@ -1,4 +1,4 @@
-require('dotenv').config(); // Ajout pour charger les variables d'environnement
+require('dotenv').config();
 const express = require('express');
 const { ethers } = require('ethers');
 const app = express();
@@ -20,7 +20,7 @@ const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
 const signer = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
 const contract = new ethers.Contract(contractAddress, contractAbi, signer);
 
-let potentialBoosters = []; // Variable globale pour stocker les boosters potentiels
+let potentialBoosters = []; //variable globale pour stocker les boosters potentiels
 
 const defaultSets = [
   'base1',    
@@ -43,8 +43,7 @@ const defaultSets = [
   // 'sv7',      
 ];
 
-
-// Route pour récupérer toutes les collections disponibles
+//route pour récupérer toutes les collections disponibles
 app.get('/collections', async (req, res) => {
   try {
     const [ids, names, cardCounts] = await contract.getAllCollections();
@@ -86,12 +85,13 @@ app.get('/collections', async (req, res) => {
   }
 });
 
+//route pour récupérer les informations des cartes d'une collection
 app.get('/collection-cards/:collectionId', async (req, res) => {
   try {
     const { collectionId } = req.params;
     const [collectionName, cardCount] = await contract.collections(collectionId);
     
-    // Récupérer les informations du set depuis l'API Pokémon TCG
+    //récupére les informations du set depuis l'API Pokémon TCG
     const setResponse = await axios.get(`https://api.pokemontcg.io/v2/sets`, {
       headers: {
         'X-Api-Key': process.env.POKEMON_TCG_API_KEY
@@ -107,7 +107,7 @@ app.get('/collection-cards/:collectionId', async (req, res) => {
 
     const setId = setResponse.data.data[0].id;
 
-    // Récupérer les cartes du set
+    //récupére les cartes du set
     const cardsResponse = await axios.get(`https://api.pokemontcg.io/v2/cards`, {
       headers: {
         'X-Api-Key': process.env.POKEMON_TCG_API_KEY
@@ -132,7 +132,7 @@ app.get('/collection-cards/:collectionId', async (req, res) => {
   }
 });
 
-
+//créer une collection en fonction du setId
 async function addPokemonSet(setId) {
   try {
     const response = await axios.get(`https://api.pokemontcg.io/v2/sets/${setId}`, {
@@ -148,13 +148,14 @@ async function addPokemonSet(setId) {
   }
 }
 
+//créer toutes les collections correspondant à la liste defaultSets
 async function initializePokemonSets() {
   for (const setId of defaultSets) {
     await addPokemonSet(setId);
   }
 }
 
-// initialiser les sets Pokémon
+// route pour initialiser les sets Pokémon
 app.post('/initialize-pokemon-sets', async (req, res) => {
   try {
     await initializePokemonSets();
@@ -165,7 +166,7 @@ app.post('/initialize-pokemon-sets', async (req, res) => {
   }
 });
 
-
+// route pour initialiser le contenu des boosters
 app.post('/set-booster-content', async (req, res) => {
   const { boosterId, collectionId, userAddress } = req.body;
   try {
@@ -189,7 +190,7 @@ app.post('/set-booster-content', async (req, res) => {
   }
 });
 
-
+//route pour récupérer la liste des minted users
 app.get('/minted-users', async (req, res) => {
   try {
     const mintedUsers = await contract.getAllMintedUsers(); 
@@ -200,7 +201,7 @@ app.get('/minted-users', async (req, res) => {
   }
 });
 
-// Route pour récupérer les NFTs d'un utilisateur
+// route pour récupérer les cartes d'un utilisateur
 app.get('/user-nfts/:userAddress', async (req, res) => {
   try {
     const { userAddress } = req.params;
@@ -241,9 +242,7 @@ app.get('/user-nfts/:userAddress', async (req, res) => {
   }
 });
 
-
-
-// Fonction pour générer un contenu aléatoire pour un booster
+//fonction pour générer un contenu aléatoire pour un booster
 async function generateBoosterContent(collectionId, collectionName, cardCount) {
   try {
     const boosterSize = 8; // Nombre de cartes dans un booster
@@ -276,12 +275,12 @@ async function generateBoosterContent(collectionId, collectionName, cardCount) {
       };
     }).filter(card => card !== null);
 
-    // Vérifiez si boosterContent a le bon nombre de cartes
+    // vérifie si boosterContent a le bon nombre de cartes
     if (boosterContent.length !== boosterSize) {
       console.error(`Expected ${boosterSize} cards, but got ${boosterContent.length}`);
     }
 
-    // Retourner les IDs des cartes en tant que chaînes
+    // retourne les IDs des cartes en tant que chaînes
     return boosterContent.map(card => card.id);
   } catch (error) {
     console.error('Erreur lors de la génération du contenu du booster:', error);
@@ -289,7 +288,7 @@ async function generateBoosterContent(collectionId, collectionName, cardCount) {
   }
 }
 
-
+// route pour initialiser des booster pour toutes les collections
 app.post('/generate-boosters-for-all-collections', async (req, res) => {
   try {
     const [collectionIds, collectionNames, cardCounts] = await contract.getAllCollections();
@@ -300,10 +299,10 @@ app.post('/generate-boosters-for-all-collections', async (req, res) => {
       const collectionName = collectionNames[i];
       const cardCount = cardCounts[i].toString();
 
-      // Générer le contenu potentiel du booster sans le créer
+      // génère le contenu potentiel du booster sans le créer
       const boosterContent = await generateBoosterContent(collectionId, collectionName, cardCount);
 
-      // Obtenir l'URL de l'image de la collection
+      //obtient l'image de la collection
       let imageUrl = '';
       try {
         const response = await axios.get(`https://api.pokemontcg.io/v2/sets`, {

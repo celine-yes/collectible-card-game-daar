@@ -21,7 +21,7 @@ const MintedUsers = () => {
   const [openUser, setOpenUser] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Récupère les utilisateurs et leurs NFTs depuis le backend
+  //récupère les utilisateurs et leurs NFTs depuis le backend
   const fetchMintedUsers = async () => {
     setIsLoading(true);
     try {

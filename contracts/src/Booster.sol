@@ -44,10 +44,5 @@ contract Booster is ERC721, Ownable {
         emit BoosterOpened(boosterId, msg.sender);
     }
 
-    // Override function to disable transfers of unopened boosters
-    function _update(address to, uint256 tokenId, address auth) internal virtual override returns (address) {
-        address from = _ownerOf(tokenId);
-        require(from == address(0) || boosters[tokenId].opened, "Cannot transfer unopened booster");
-        return super._update(to, tokenId, auth);
-    }
+
 }

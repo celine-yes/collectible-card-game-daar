@@ -75,7 +75,7 @@ const CollectionManager: React.FC = () => {
 
   const handleCollectionClick = (collection: Collection) => {
     setSelectedCollection(collection);
-    setCards([]); // Réinitialiser les cartes
+    setCards([]);
     fetchCollectionCards(collection.id); 
     setCurrentPage(1);
   };
@@ -89,7 +89,7 @@ const CollectionManager: React.FC = () => {
   };
 
   const handleMintClick = () => {
-    console.log("Opening mint modal"); // Ajoutez ce log pour déboguer
+    console.log("Opening mint modal");
     setShowModal(true);
   };
 

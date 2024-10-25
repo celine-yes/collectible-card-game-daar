@@ -110,14 +110,14 @@
 .cards-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 30px; /* Space between cards */
+  gap: 30px; 
   justify-content: flex-start;
 }
 
 .card {
   width: calc(25% - 30px);
   max-width: 210px; 
-  background-color: rgba(248, 248, 255, 0.7); /* Fond semi-transparent */
+  background-color: rgba(248, 248, 255, 0.7); 
   border-radius: 12px;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); 
   overflow: hidden;
@@ -190,7 +190,7 @@
 
 .search-input {
   flex: 1;
-  margin-right: 20px; /* Adds space between input and button */
+  margin-right: 20px; 
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
