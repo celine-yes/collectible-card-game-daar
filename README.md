@@ -1,6 +1,6 @@
 # Collectible Card Game
 
-Welcome to the DAAR project, implemented by Dilyara BABANAZAROVA and Céline FAN. This project aims to create a decentralized Collectible Card Game (CCG) on the Ethereum blockchain. The game involves generating CCG cards as NFTs and setting up a frontend for players to manage collections.
+Welcome to the DAAR project, implemented by **Dilyara BABANAZAROVA** and **Céline FAN**. This project aims to create a decentralized Collectible Card Game (CCG) on the Ethereum blockchain. The game involves generating CCG cards as NFTs and setting up a frontend for players to manage collections.
 
 To launch the project, simply run `yarn dev` after completing the installation steps.
 
