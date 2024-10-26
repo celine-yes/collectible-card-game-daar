@@ -8,13 +8,6 @@ To launch the project, simply run `yarn dev` after completing the installation s
 
 # Installation
 
-```bash
-# With HTTPS
-git clone https://github.com/ghivert/collectible-card-game-daar.git
-# Or with SSH
-git clone git@github.com:ghivert/collectible-card-game-daar.git
-```
-
 You’ll need to install dependencies. You’ll need [`HardHat`](https://hardhat.org/), [`Node.js`](https://nodejs.org/en/), [`NPM`](https://www.npmjs.com/) and [`Yarn`](https://yarnpkg.com/). You’ll need to install [`Metamask`](https://metamask.io/) as well to communicate with your blockchain.
 
 - `HardHat` is a local blockchain development, to iterate quickly and avoiding wasting Ether during development. Fortunately, you have nothing to do to install it.
@@ -31,25 +24,6 @@ Now you can connect Metamask to the blockchain. To do this, add a network by cli
 
 Once you have done it, you’re connected to the HardHat blockchain!
 
-# Installation
-
-Install the dependencies.
-
-```bash
-# Yarn users
-yarn
-```
-
-Run the complete project.
-
-```bash
-# Yarn users
-yarn dev
-```
-
-You’re good to go!
-
----
 
 # Subject
 
